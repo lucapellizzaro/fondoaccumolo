@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+data/*.parquet
+# NB: data/static/*.csv (storico pre-2017) va VERSIONATO, non ignorato.
+.DS_Store
+.streamlit/secrets.toml
