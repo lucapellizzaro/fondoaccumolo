@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 
 from src import config, indicators, onchain, scoring
 from src.data_fetcher import fetch_prices
-from src.halving import get_cycle_info
+from src.halving import cycle_calendar, get_cycle_info
 
 st.set_page_config(page_title="Fondo Accumulo · Analisi Halving", page_icon="📊", layout="wide")
 
@@ -82,6 +82,42 @@ hc2.metric("Giorni dall'ultimo halving",
 hc3.metric("Giorni al prossimo (stima)",
            f"{cycle.days_to_next}" if cycle.days_to_next is not None else "—")
 st.info(f"**Fase di ciclo:** {cycle.phase}")
+
+# ------------------------------------------------- Calendario del ciclo
+with st.expander("📅 Calendario del ciclo: quando il segnale halving sarà favorevole"):
+    st.markdown(
+        f"Delle 4 componenti dello score, **solo il ciclo di halving "
+        f"({config.WEIGHTS['cycle']} punti su 100) è prevedibile in anticipo**, perché "
+        f"dipende dal calendario. Trend, RSI e Fear & Greed dipendono dal mercato di "
+        f"quel giorno e non si possono conoscere oggi: queste date indicano quindi i "
+        f"periodi in cui il *contesto di ciclo* sarà favorevole, non un segnale d'acquisto."
+    )
+    windows = cycle_calendar(cycle.reference_coin, today=date.today())
+    if windows:
+        rows = []
+        for cw in windows:
+            if cw.start <= date.today() <= cw.end:
+                stato = "◀ oggi"
+            elif cw.end < date.today():
+                stato = "passata"
+            else:
+                stato = "futura"
+            rows.append({
+                "Dal": cw.start.strftime("%d/%m/%Y"),
+                "Al": cw.end.strftime("%d/%m/%Y") + (" *" if cw.estimated else ""),
+                "Fase": cw.label,
+                f"Punti ciclo (su {config.WEIGHTS['cycle']})": f"{cw.cycle_points:.0f}",
+                "Stato": stato,
+            })
+        st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+        if any(cw.estimated for cw in windows) and cycle.next_halving is not None:
+            st.caption(
+                "\\* Date basate sulla **stima** del prossimo halving "
+                f"({cycle.next_halving:%d/%m/%Y}): la data esatta dipende dal ritmo dei "
+                "blocchi e può spostarsi di alcune settimane."
+            )
+    else:
+        st.caption("Nessun halving noto per questo riferimento: calendario non disponibile.")
 
 # --------------------------------------------------------- Contesto on-chain
 glob = load_global()

@@ -36,19 +36,20 @@ def _cycle_signal(cycle: CycleInfo) -> Signal:
     if d is None:
         return Signal("Ciclo halving", w * 0.5, w, "Fase di ciclo sconosciuta: punteggio neutro.")
 
+    mult = config.CYCLE_PHASE_MULT
     if d <= config.EUPHORIA_WINDOW_DAYS:
-        return Signal("Ciclo halving", w, w,
+        return Signal("Ciclo halving", w * mult["euphoria"], w,
                       f"Siamo a {d} giorni dall'halving di {cycle.reference_coin}: "
                       f"fase storicamente piu' rialzista (primi ~12 mesi).")
     if d <= config.BULL_WINDOW_DAYS:
-        return Signal("Ciclo halving", w * 0.7, w,
+        return Signal("Ciclo halving", w * mult["late_bull"], w,
                       f"{d} giorni dall'halving: espansione tardiva, storicamente ancora "
                       f"favorevole ma piu' avanti nel ciclo.")
-    if cycle.days_to_next is not None and cycle.days_to_next <= 6 * 30:
-        return Signal("Ciclo halving", w * 0.6, w,
+    if cycle.days_to_next is not None and cycle.days_to_next <= config.PRE_HALVING_WINDOW_DAYS:
+        return Signal("Ciclo halving", w * mult["pre_halving"], w,
                       f"Prossimo halving tra {cycle.days_to_next} giorni: fase di accumulo "
                       f"pre-halving, storicamente interessante per entrare gradualmente.")
-    return Signal("Ciclo halving", w * 0.25, w,
+    return Signal("Ciclo halving", w * mult["out"], w,
                   f"{d} giorni dall'ultimo halving: fuori dalla finestra rialzista tipica, "
                   f"mercato piu' maturo/correttivo.")
 

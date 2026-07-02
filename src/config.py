@@ -56,6 +56,15 @@ NEXT_HALVING_ESTIMATE: dict[str, date] = {
 # Finestra storicamente rialzista dopo l'halving, espressa in giorni.
 BULL_WINDOW_DAYS = 18 * 30          # ~18 mesi: fase di tipica espansione post-halving
 EUPHORIA_WINDOW_DAYS = 12 * 30      # primi ~12 mesi: parte piu' forte del ciclo
+PRE_HALVING_WINDOW_DAYS = 6 * 30    # ultimi ~6 mesi prima del prossimo halving
+
+# Moltiplicatori del peso "cycle" per ciascuna fase (usati da scoring e calendario).
+CYCLE_PHASE_MULT = {
+    "euphoria": 1.0,      # primi ~12 mesi post-halving
+    "late_bull": 0.7,     # 12-18 mesi post-halving
+    "pre_halving": 0.6,   # ultimi ~6 mesi prima del prossimo halving
+    "out": 0.25,          # fuori dalle finestre tipiche
+}
 
 RSI_OVERSOLD = 30                   # sotto = ipervenduto (possibile occasione)
 RSI_OVERBOUGHT = 70                 # sopra = ipercomprato (cautela)
